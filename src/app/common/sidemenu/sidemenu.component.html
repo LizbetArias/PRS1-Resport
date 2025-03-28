@@ -1,0 +1,129 @@
+<div
+  id="menu"
+  class="bg-gray-800 text-gray-300 w-64 h-screen overflow-y-auto flex flex-col shadow-lg">
+  <!-- Logo -->
+  <div id="logo" class="my-8 px-8 flex items-center">
+    <img src="https://i.ibb.co/JqmVCv1/logo.png" alt="Logo" class="h-12 w-auto">
+    <h1 class="ml-3 text-xl font-bold text-white">
+      Modulo Casa hogar
+    </h1>
+  </div>
+
+  <div id="menu" class="bg-gray-800 text-gray-300 w-64 h-screen overflow-y-auto flex flex-col shadow-lg">
+    <div id="nav" class="flex-1 px-4 py-4 space-y-2">
+      <!-- Menú principal -->
+      <ng-container *ngFor="let item of menuItems; let i = index">
+        <!-- Dropdown con submenús -->
+        <div *ngIf="item.children && item.children.length; else singleItem">
+          <div
+            class="flex justify-between items-center px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-md cursor-pointer transition"
+            (click)="toggleDropdown(i)">
+            <div class="flex items-center">
+              <i class="fa fa-{{ item.icon }} mr-2"></i>
+              <span class="font-medium text-white">{{ item.title }}</span>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              class="w-5 h-5 text-gray-300 transition-transform duration-200"
+              [class.rotate-180]="dropdownIndex === i">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
+          <!-- Submenú -->
+          <div *ngIf="dropdownIndex === i" class="pl-6 mt-1 space-y-1">
+            <ng-container *ngFor="let child of item.children; let j = index">
+              <ng-template #childItem>
+                <a
+                  [routerLink]="child.path"
+                  routerLinkActive="bg-blue-800 text-white"
+                  class="block px-3 py-2 text-sm rounded-md hover:bg-gray-600 hover:text-white transition">
+                  {{ child.title }}
+                </a>
+              </ng-template>
+              <div *ngIf="child.children && child.children.length; else childItem">
+                <div
+                  class="flex justify-between items-center px-3 py-2 hover:bg-gray-600 rounded-md cursor-pointer transition"
+                  (click)="toggleSubDropdown(i, j)">
+                  <span class="text-sm font-medium text-gray-300">
+                    {{ child.title }}
+                  </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    class="w-4 h-4 text-gray-300 transition-transform duration-200"
+                    [class.rotate-180]="subDropdownIndex.get(i) === j">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                <!-- Sub-submenú -->
+                <div *ngIf="subDropdownIndex.get(i) === j" class="pl-6 mt-1 space-y-1">
+                  <ng-container *ngFor="let grandChild of child.children; let k = index">
+                    <div *ngIf="grandChild.children && grandChild.children.length; else grandChildItem">
+                      <div
+                        class="flex justify-between items-center px-3 py-2 hover:bg-gray-600 rounded-md cursor-pointer transition"
+                        (click)="toggleGrandSubDropdown(i, j, k)">
+                        <span class="text-sm font-medium text-gray-300">
+                          {{ grandChild.title }}
+                        </span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          class="w-4 h-4 text-gray-300 transition-transform duration-200"
+                          [class.rotate-180]="grandSubDropdownIndex.get(i)?.get(j) === k">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+
+                      <!-- Sub-sub-submenú -->
+                      <div *ngIf="grandSubDropdownIndex.get(i)?.get(j) === k" class="pl-6 mt-1 space-y-1">
+                        <a
+                          *ngFor="let greatGrandChild of grandChild.children"
+                          [routerLink]="greatGrandChild.path"
+                          routerLinkActive="bg-blue-800 text-white"
+                          class="block px-3 py-2 text-sm rounded-md hover:bg-gray-600 hover:text-white transition">
+                          {{ greatGrandChild.title }}
+                        </a>
+                      </div>
+                    </div>
+
+                    <!-- Sub-submenú sin hijos -->
+                    <ng-template #grandChildItem>
+                      <a
+                        [routerLink]="grandChild.path"
+                        routerLinkActive="bg-blue-800 text-white"
+                        class="block px-3 py-2 text-sm rounded-md hover:bg-gray-600 hover:text-white transition">
+                        {{ grandChild.title }}
+                      </a>
+                    </ng-template>
+                  </ng-container>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Ítems sin hijos -->
+        <ng-template #singleItem>
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="bg-blue-800 text-white"
+            class="block px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition">
+            {{ item.title }}
+          </a>
+        </ng-template>
+      </ng-container>
+    </div>
+  </div>
+</div>

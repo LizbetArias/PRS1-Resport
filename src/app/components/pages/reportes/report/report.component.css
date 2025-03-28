@@ -1,0 +1,55 @@
+.toggle-input:checked {
+    transform: translateX(100%);
+    border-color: #28a745;
+}
+
+.toggle-input {
+    transition: transform 0.3s ease-in-out, border-color 0.3s ease;
+}
+
+.toggle-label {
+    transition: background-color 0.3s ease-in-out;
+}
+
+.toggle-label:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    /* Color de fondo del encabezado */
+    border-bottom: 1px solid #dee2e6;
+    /* Borde inferior */
+}
+
+.modal-body {
+    max-height: 400px;
+    /* Altura máxima del cuerpo */
+    overflow-y: auto;
+    /* Habilita el desplazamiento vertical */
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    /* Alinea los botones a la derecha */
+}
+
+.descripcion-texto {
+    display: -webkit-box; /* Para soporte de WebKit */
+    -webkit-box-orient: vertical; /* Orientación vertical */
+    -webkit-line-clamp: 2; /* Limitar a 2 líneas */
+    overflow: hidden; /* Ocultar el desbordamiento */
+    text-overflow: ellipsis; /* Mostrar puntos suspensivos */
+    max-width: 500px; /* Ancho máximo (ajusta según sea necesario) */
+    margin: 0 auto; /* Centrar el texto */
+}

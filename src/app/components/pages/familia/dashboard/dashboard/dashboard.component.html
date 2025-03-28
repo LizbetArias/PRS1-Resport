@@ -1,0 +1,112 @@
+<div class="container mx-auto my-8 p-4">
+    <header class="bg-white shadow mb-8">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 class="text-7xl font-extrabold text-blue-900">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600">
+            Dashboard Familia
+          </span>
+        </h1>
+      </div>
+    </header>
+  
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-2xl font-bold mb-4">Familia Listado</h2>
+      <div class="mb-4 flex justify-between items-center">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded" (click)="openModal()">
+          Agregar Familia
+        </button>
+  
+        <div class="flex items-center">
+          <label for="statusSwitcher" class="mr-3 text-lg font-semibold">Estado:</label>
+          <div class="relative inline-block w-12 mr-2 align-middle select-none">
+            <input
+              type="checkbox"
+              id="statusSwitcher"
+              [(ngModel)]="isActive"
+              (change)="toggleStatus()"
+              class="toggle-input absolute block w-6 h-6 rounded-full bg-white border-2 appearance-none cursor-pointer"
+            />
+            <span
+              class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer"
+              [ngClass]="isActive ? 'bg-green-500' : 'bg-red-500'"
+            ></span>
+          </div>
+          <span class="ml-2 font-semibold" [ngClass]="isActive ? 'text-green-500' : 'text-red-500'">
+            {{ isActive ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+      </div>
+      <!-- Tabla -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-center border-separate" style="border-spacing: 0 10px;">
+          <thead>
+            <tr>
+              <th class="px-6 py-3 text-lg font-semibold text-blue-900 bg-blue-100">Nombre</th>
+              <th class="px-6 py-3 text-lg font-semibold text-blue-900 bg-blue-100">Taller</th>
+              <th class="px-6 py-3 text-lg font-semibold text-blue-900 bg-blue-100">Estado</th>
+              <th class="px-6 py-3 text-lg font-semibold text-blue-900 bg-blue-100">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let issue of filteredIssues">
+              <td class="px-6 py-4 bg-gray-100">{{ issue.name }}</td>
+              <td class="px-6 py-4 bg-gray-100">{{ issue.workshopId }}</td>
+              <td class="px-6 py-4 bg-gray-100">{{ issue.state === 'A' ? 'Activo' : 'Inactivo' }}</td>
+              <td class="px-6 py-4 bg-gray-100">
+                <button *ngIf="issue.state === 'A'"
+                  class="bg-yellow-500 text-white px-3 py-1 rounded mr-2"
+                  (click)="editSupplierDetails(issue)">
+                  Editar
+                </button>
+                <button *ngIf="issue.state === 'A'"
+                  class="bg-red-500 text-white px-3 py-1 rounded"
+                  (click)="inactivateIssue(issue.id)">
+                  Eliminar
+                </button>
+                <button *ngIf="issue.state === 'I'"
+                  class="bg-green-500 text-white px-3 py-1 rounded"
+                  (click)="activateIssue(issue.id)">
+                  Restaurar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <!-- Modal -->
+    <div *ngIf="isModalOpen"
+      class="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
+      <div class="bg-white p-6 rounded-lg w-96">
+        <h2 class="text-2xl font-bold mb-4">
+          {{ isEditMode ? 'Editar Proveedor' : 'Agregar Proveedor' }}
+        </h2>
+        <form (ngSubmit)="isEditMode ? updateSupplier() : addIssue()">
+          <div class="mb-4">
+            <label class="block text-lg font-semibold" for="company">Nombre</label>
+            <input class="border p-2 w-full rounded" id="company"
+              [(ngModel)]="issueForm.name" name="company" required />
+          </div>
+          <div class="mb-4">
+            <label class="block text-lg font-semibold" for="workshopId">Taller</label>
+            <input class="border p-2 w-full rounded" id="workshopId"
+              [(ngModel)]="issueForm.workshopId" name="workshopId" required type="number" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-lg font-semibold" for="scheduledTime">Hora Programada</label>
+            <input class="border p-2 w-full rounded" id="scheduledTime"
+              [(ngModel)]="issueForm.scheduledTime" name="scheduledTime"
+              type="datetime-local" required />
+          </div>
+          <div class="flex justify-end">
+            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+              (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">
+              {{ isEditMode ? 'Actualizar' : 'Agregar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,467 @@
+<div class="container mx-auto px-4 py-6">
+    <!-- Header Reportes Trimestrales -->
+    <header class="bg-white shadow mb-4">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h1 class="text-5xl font-extrabold text-blue-500">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600">
+                    Reportes Trimestrales
+                </span>
+            </h1>
+        </div>
+    </header>
+
+    <!-- Filtros superiores -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Filtros de Búsqueda</h2>
+            <button (click)="clearAllFilters()"
+                class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md flex items-center hover:bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Limpiar filtros
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <!-- Filtro de Trimestre -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Trimestre</label>
+                <select [(ngModel)]="selectedTrimester" (change)="filterReports()"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Todos los trimestres</option>
+                    <option value="Enero-Marzo">Enero-Marzo</option>
+                    <option value="Abril-Junio">Abril-Junio</option>
+                    <option value="Julio-Septiembre">Julio-Septiembre</option>
+                    <option value="Octubre-Diciembre">Octubre-Diciembre</option>
+                </select>
+            </div>
+
+            <!-- Filtro de Año -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Año</label>
+                <select [(ngModel)]="selectedYear" (change)="filterReports()"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Todos los años</option>
+                    <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+                </select>
+            </div>
+
+            <!-- Toggle Estado -->
+            <div class="flex flex-col">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <div class="flex items-center mt-1">
+                    <button (click)="setActiveFilter('active')"
+                        [ngClass]="{'bg-blue-600 text-white': activeFilter === 'active', 'bg-gray-200 text-gray-700': activeFilter !== 'active'}"
+                        class="px-4 py-2 font-medium text-sm">
+                        Activos
+                    </button>
+                    <button (click)="setActiveFilter('inactive')"
+                        [ngClass]="{'bg-blue-600 text-white': activeFilter === 'inactive', 'bg-gray-200 text-gray-700': activeFilter !== 'inactive'}"
+                        class="px-4 py-2 rounded-r-md font-medium text-sm">
+                        Inactivos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtro por rango de fechas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                <input type="date" [(ngModel)]="startDate" (change)="filterReports()"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                <input type="date" [(ngModel)]="endDate" (change)="filterReports()"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de reportes -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h2 class="text-xl font-semibold">Listado de Reportes</h2>
+            <div class="flex space-x-2">
+                <button (click)="refreshReports()"
+                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md flex items-center hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Actualizar
+                </button>
+                <button (click)="createReport()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center hover:bg-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nuevo Reporte
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="overflow-x-auto">
+            <table
+                class="min-w-full divide-y divide-gray-200 text-sm text-left rtl:text-right text-gray-950 dark:text-gray-950">
+                <thead class="text-xs text-gray-100 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-50">
+                    <tr>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-stone-50 uppercase tracking-wider">Año
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-stone-50 uppercase tracking-wider">
+                            Trimestre</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-stone-50 uppercase tracking-wider">
+                            Descripción</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-stone-50 uppercasetracking-wider">
+                            Talleres</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-right text-xs font-medium text-stone-50 uppercase tracking-wider">
+                            Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr *ngFor="let reportData of pagedReports" class="hover:bg-gray-100">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ reportData.report ? reportData.report.year : reportData.year }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ reportData.report ? reportData.report.trimester : reportData.trimester }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                            {{ reportData.report ? reportData.report.description : reportData.description }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div class="flex items-center">
+                                <span class="mr-2">
+                                    {{ (reportData.workshop ? reportData.workshop.length :
+                                    (reportData.report && reportData.report.workshop ? reportData.report.workshop.length
+                                    : 0)) }}
+                                </span>
+                                <button
+                                    *ngIf="(reportData.workshop && reportData.workshop.length > 0) || 
+                                              (reportData.report && reportData.report.workshop && reportData.report.workshop.length > 0)"
+                                    (click)="viewWorkshops(reportData)" class="text-blue-600 hover:text-blue-800"
+                                    title="Ver talleres">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                        viewBox="0 0 24 24" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M14 3v5h5M9 13h6M9 17h6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex justify-end space-x-2">
+                                <!-- Ver -->
+                                <button (click)="viewReport(reportData)" class="text-blue-600 hover:text-blue-900"
+                                    title="Ver detalles">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                                <!-- Editar -->
+                                <button (click)="editReport(reportData)" class="text-indigo-600 hover:text-indigo-900"
+                                    title="Editar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <!-- Eliminar/Restaurar -->
+                                <button
+                                    *ngIf="(reportData.report ? reportData.report.active : reportData.active) === 'A'"
+                                    (click)="deleteReport(reportData)" class="text-red-600 hover:text-red-900"
+                                    title="Eliminar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                                <button
+                                    *ngIf="(reportData.report ? reportData.report.active : reportData.active) !== 'A'"
+                                    (click)="restoreReport(reportData)" class="text-green-600 hover:text-green-900"
+                                    title="Restaurar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </button>
+                                <!-- Descargar PDF -->
+                                <button (click)="downloadPdf(reportData)" class="text-gray-600 hover:text-gray-900"
+                                    title="Descargar PDF">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Mensaje cuando no hay resultados -->
+                    <tr *ngIf="pagedReports.length === 0">
+                        <td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">
+                            No se encontraron reportes con los filtros seleccionados
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Paginación -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Mostrando <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> a
+                        <span class="font-medium">{{ Math.min(currentPage * pageSize, filteredReports.length) }}</span>
+                        de
+                        <span class="font-medium">{{ filteredReports.length }}</span> resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <!-- Botón anterior -->
+                        <button (click)="previousPage()" [disabled]="currentPage === 1"
+                            [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+                            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Anterior</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <!-- Números de página -->
+                        <ng-container *ngFor="let page of getPageNumbers()">
+                            <button (click)="goToPage(page)"
+                                [ngClass]="{'bg-blue-50 border-blue-500 text-blue-600': currentPage === page, 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': currentPage !== page}"
+                                class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                {{ page }}
+                            </button>
+                        </ng-container>
+                        <!-- Botón siguiente -->
+                        <button (click)="nextPage()" [disabled]="currentPage >= totalPages"
+                            [ngClass]="{'opacity-50 cursor-not-allowed': currentPage >= totalPages}"
+                            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Siguiente</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario modal -->
+<app-report-form [isVisible]="showReportForm" [reportData]="selectedReport" (close)="closeReportForm()"
+    (saved)="onReportSaved($event)">
+</app-report-form>
+
+<!-- Modal de visualización de imágenes -->
+<div *ngIf="showImageViewer" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="image-viewer" role="dialog"
+    aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+        <!-- Overlay de fondo -->
+        <div class="fixed inset-0 bg-black bg-opacity-90 transition-opacity" aria-hidden="true"
+            (click)="closeImageViewer()"></div>
+
+        <!-- Contenido del visor -->
+        <div class="relative inline-block max-w-3xl w-full z-[110]">
+            <button type="button" (click)="closeImageViewer()" class="absolute top-4 right-4 text-white z-[120]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="relative">
+                <img [src]="currentImages[currentImageIndex]" alt="Imagen del taller" class="max-h-[80vh] mx-auto">
+
+                <!-- Controles de navegación -->
+                <div class="absolute inset-0 flex items-center justify-between">
+                    <button *ngIf="currentImageIndex > 0" type="button" (click)="prevImage()"
+                        class="bg-black bg-opacity-50 text-white rounded-full p-2 ml-4 hover:bg-opacity-70">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button *ngIf="currentImageIndex < currentImages.length - 1" type="button" (click)="nextImage()"
+                        class="bg-black bg-opacity-50 text-white rounded-full p-2 mr-4 hover:bg-opacity-70">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Miniaturas -->
+            <div class="mt-4 flex justify-center space-x-2 overflow-x-auto">
+                <button *ngFor="let image of currentImages; let i = index" type="button" (click)="currentImageIndex = i"
+                    class="h-16 w-16 flex-shrink-0 rounded-md overflow-hidden"
+                    [ngClass]="{'ring-2 ring-blue-500': currentImageIndex === i}">
+                    <img [src]="image" alt="Miniatura" class="h-full w-full object-cover">
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de visualización de talleres -->
+<div *ngIf="showWorkshopViewer" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="workshop-viewer"
+    role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+        <!-- Overlay de fondo -->
+        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true"
+            (click)="closeWorkshopViewer()"></div>
+
+        <!-- Contenido del visor de talleres -->
+        <div
+            class="relative inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="absolute top-0 right-0 pt-4 pr-4">
+                <button type="button" (click)="closeWorkshopViewer()" class="text-gray-400 hover:text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex justify-between items-center">
+                            <span>Detalles del Taller</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">{{ currentWorkshopIndex + 1 }} de {{
+                                    currentWorkshops.length }}</span>
+                                <button *ngIf="currentWorkshopIndex > 0" (click)="prevWorkshop()"
+                                    class="p-1 rounded-full hover:bg-gray-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <button *ngIf="currentWorkshopIndex < currentWorkshops.length - 1"
+                                    (click)="nextWorkshop()" class="p-1 rounded-full hover:bg-gray-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </h3>
+
+                        <div class="mt-2">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="mb-4">
+                                    <h4 class="text-lg font-semibold text-gray-900">
+                                        {{ currentWorkshops[currentWorkshopIndex]?.workshopName }}
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        {{ currentWorkshops[currentWorkshopIndex]?.description }}
+                                    </p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-700">Fecha Inicio</span>
+                                        <span class="block mt-1 text-sm text-gray-900">
+                                            {{ formatDate(currentWorkshops[currentWorkshopIndex]?.startDate) }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-700">Fecha Fin</span>
+                                        <span class="block mt-1 text-sm text-gray-900">
+                                            {{ formatDate(currentWorkshops[currentWorkshopIndex]?.endDate) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Imágenes del taller -->
+                                <div
+                                    *ngIf="currentWorkshops[currentWorkshopIndex] && currentWorkshops[currentWorkshopIndex].imageUrl && currentWorkshops[currentWorkshopIndex].imageUrl.length > 0">
+                                    <h5 class="text-sm font-medium text-gray-700 mb-2">Imágenes del Taller</h5>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div *ngFor="let imageUrl of currentWorkshops[currentWorkshopIndex].imageUrl; let i = index"
+                                            class="relative cursor-pointer group"
+                                            (click)="$event.stopPropagation(); viewCurrentWorkshopImages()">
+                                            <img [src]="imageUrl.startsWith('http') ? imageUrl : 
+                                                imageUrl.startsWith('data:image') ? imageUrl :
+                                                (imageUrl.startsWith('iVBOR') || imageUrl.startsWith('ASUN') || 
+                                                imageUrl.includes('/9j/') || imageUrl.includes('+/9k=')) ? 
+                                                'data:image/png;base64,' + imageUrl : '/assets/placeholder-image.png'"
+                                                alt="Imagen del taller"
+                                                class="h-20 w-full object-cover rounded-md transition-all duration-300 group-hover:opacity-90">
+                                            <div
+                                                class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span
+                                                    class="bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">Ver</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <button type="button"
+                                            (click)="$event.stopPropagation(); viewCurrentWorkshopImages()"
+                                            class="text-sm text-blue-600 hover:text-blue-800 flex items-center justify-center mx-auto">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            Ver todas las imágenes
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="currentWorkshops[currentWorkshopIndex] && (!currentWorkshops[currentWorkshopIndex].imageUrl || currentWorkshops[currentWorkshopIndex].imageUrl.length === 0)"
+                                    class="text-center py-4 text-gray-500">
+                                    No hay imágenes disponibles para este taller
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" (click)="closeWorkshopViewer()"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
