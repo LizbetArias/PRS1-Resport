@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: report-service
+  r2dbc:
+    url: r2dbc:postgresql://neondb_owner:GQaLu2oDSTR6@ep-aged-lake-a4wjkmtd-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+    #url: ${DATABASE_URL}
+    show-sql: true
+    pool:
+      max-size: 20
+      validation-query: SELECT 1
+      initial-size: 5
+  codec:
+    max-in-memory-size: 30MB
+
+# URL del servicio de workshops
+workshop:
+  service:
+    url: http://localhost:8081
+
+logging:
+  level:
+    io.r2dbc: DEBUG
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
+
